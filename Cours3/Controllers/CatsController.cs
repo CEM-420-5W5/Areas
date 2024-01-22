@@ -1,43 +1,124 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Cours3.Data;
+using Cours3Area.Models;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace Cours3Area.Controllers
+namespace Area.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class CatsController : ControllerBase
     {
-        // GET: api/<CatsController>
+        private readonly ApplicationDbContext _context;
+
+        public CatsController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/Cats
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<Cat>>> GetCat()
         {
-            return new string[] { "value1", "value2" };
+          if (_context.Cat == null)
+          {
+              return NotFound();
+          }
+            return await _context.Cat.ToListAsync();
         }
 
-        // GET api/<CatsController>/5
+        // GET: api/Cats/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Cat>> GetCat(int id)
         {
-            return "value";
+          if (_context.Cat == null)
+          {
+              return NotFound();
+          }
+            var cat = await _context.Cat.FindAsync(id);
+
+            if (cat == null)
+            {
+                return NotFound();
+            }
+
+            return cat;
         }
 
-        // POST api/<CatsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<CatsController>/5
+        // PUT: api/Cats/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult> PutCat(int id, Cat cat)
         {
+            if (id != cat.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(cat).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CatExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // DELETE api/<CatsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        // POST: api/Cats
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Cat>> PostCat(Cat cat)
         {
+          if (_context.Cat == null)
+          {
+              return Problem("Entity set 'ApplicationDbContext.Cat'  is null.");
+          }
+            _context.Cat.Add(cat);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetCat", new { id = cat.Id }, cat);
+        }
+
+        // DELETE: api/Cats/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCat(int id)
+        {
+            if (_context.Cat == null)
+            {
+                return NotFound();
+            }
+            var cat = await _context.Cat.FindAsync(id);
+            if (cat == null)
+            {
+                return NotFound();
+            }
+
+            _context.Cat.Remove(cat);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool CatExists(int id)
+        {
+            return (_context.Cat?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

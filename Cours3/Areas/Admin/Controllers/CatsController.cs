@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Cours3.Data;
 using Cours3Area.Models;
 
-namespace Cours3Area.Areas.Admin.Controllers
+namespace Area.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class CatsController : Controller
@@ -57,7 +57,7 @@ namespace Cours3Area.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Cat cat)
+        public async Task<IActionResult> Create([Bind("Id,Name,ImageURL")] Cat cat)
         {
             if (ModelState.IsValid)
             {
@@ -89,7 +89,7 @@ namespace Cours3Area.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Cat cat)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ImageURL")] Cat cat)
         {
             if (id != cat.Id)
             {
